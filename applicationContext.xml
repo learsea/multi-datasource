@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc  
+                http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd 
+                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
+                http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd  
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://www.springframework.org/schema/aop
+				http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+	<!-- c3p0数据源及连接池配置 -->
+	<bean id="masterdataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${master.driverClassName}"></property>
+		<property name="jdbcUrl" value="${master.url}"></property>
+		<property name="user" value="${master.username}"></property>
+		<property name="password" value="${master.password}"></property>
+		<!-- 最小连接数 -->
+		<property name="minPoolSize" value="${master.minPoolSize}"></property>
+		<!-- 最大连接数 -->
+		<property name="maxPoolSize" value="${master.maxPoolSize}"></property>
+		<!-- 初始化连接数 -->
+		<property name="initialPoolSize" value="${master.initialPoolSize}"></property>
+		<!-- 连接耗尽后，一次性获取的新连接数 -->
+		<property name="acquireIncrement" value="${master.acquireIncrement}"></property>
+		<!-- 最大空闲时间60*30秒(0.5小时)，内不使用则丢弃 -->
+		<property name="maxIdleTime" value="${master.maxIdleTime}"></property>
+		<!-- 超过最长连接时间将被摧毁180秒 -->
+		<property name="maxConnectionAge" value="${master.maxConnectionAge}" />
+		<!-- 每个连接的最大PreparedStatements缓存数。设置为频繁使用的PreparedStatements数再加2-3 -->
+		<property name="maxStatementsPerConnection" value="${master.maxStatementsPerConnection}" />
+		<!-- 最大PreparedStatements缓存数。设置为maxStatementsPerConnection乘以maxPoolSize -->
+		<property name="maxStatements" value="${master.maxStatements}" />
+	</bean>
+
+	<!-- c3p0数据源及连接池配置 -->
+	<bean id="slavedataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${slave.driverClassName}"></property>
+		<property name="jdbcUrl" value="${slave.url}"></property>
+		<property name="user" value="${slave.username}"></property>
+		<property name="password" value="${slave.password}"></property>
+		<!-- 最小连接数 -->
+		<property name="minPoolSize" value="${slave.minPoolSize}"></property>
+		<!-- 最大连接数 -->
+		<property name="maxPoolSize" value="${slave.maxPoolSize}"></property>
+		<!-- 初始化连接数 -->
+		<property name="initialPoolSize" value="${slave.initialPoolSize}"></property>
+		<!-- 连接耗尽后，一次性获取的新连接数 -->
+		<property name="acquireIncrement" value="${slave.acquireIncrement}"></property>
+		<!-- 最大空闲时间60*30秒(0.5小时)，内不使用则丢弃 -->
+		<property name="maxIdleTime" value="${slave.maxIdleTime}"></property>
+		<!-- 超过最长连接时间将被摧毁180秒 -->
+		<property name="maxConnectionAge" value="${slave.maxConnectionAge}" />
+		<!-- 每个连接的最大PreparedStatements缓存数。设置为频繁使用的PreparedStatements数再加2-3 -->
+		<property name="maxStatementsPerConnection" value="${slave.maxStatementsPerConnection}" />
+		<!-- 最大PreparedStatements缓存数。设置为maxStatementsPerConnection乘以maxPoolSize -->
+		<property name="maxStatements" value="${slave.maxStatements}" />
+	</bean>
+
+	<!-- 配置读写分离 -->
+	<bean id="dataSource" class="com.sibu.chat.utils.dataSource.DynamicDataSource">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<!--@DataSource使用的值是这里的key-->
+				<!-- write -->
+				<entry key="master" value-ref="masterdataSource" />
+				<!-- read -->
+				<entry key="slave" value-ref="slavedataSource" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="masterdataSource" />
+	</bean>
+
+	<!-- 使用@aspectj注解 -->
+	<aop:aspectj-autoproxy />
+
+</beans> 

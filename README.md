@@ -1,0 +1,4 @@
+1、spring配置多个数据源
+2、继承AbstractRoutingDataSource
+3、在controller和service之间加一层transaction.service
+4、在中间层加注解@DataSource，并在这一层调用service（因为必须在@transaction执行前设置要选择的数据源名称）
